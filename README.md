@@ -1,67 +1,166 @@
-#Script em Python para fixar configurações e realizar backup automatico de equipamentos de rede
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Script de Backup Automático de Rede</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        h1, h2, h3 {
+            color: #007acc;
+        }
+        h1 {
+            border-bottom: 2px solid #007acc;
+            padding-bottom: 10px;
+        }
+        code {
+            background: #eee;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        pre {
+            background: #f4f4f4;
+            padding: 10px;
+            border-left: 3px solid #007acc;
+            overflow-x: auto;
+        }
+        ul {
+            list-style-type: disc;
+            margin-left: 20px;
+        }
+        .highlight {
+            background-color: #fdf5d6;
+            padding: 5px;
+            border-left: 3px solid #ffe27a;
+        }
+    </style>
+</head>
+<body>
+    <h1>Script em Python para Automação e Backup de Configurações de Rede</h1>
+    <p>
+        Este projeto apresenta um script em Python desenvolvido para automatizar o processo de salvamento e backup de configurações 
+        em equipamentos de rede. A iniciativa busca aumentar a segurança, reduzir erros humanos e garantir que as configurações críticas 
+        estejam sempre atualizadas e armazenadas de forma segura.
+    </p>
 
-Este repositório contém um script Python desenvolvido para automatizar o processo de salvamento e backup de configurações em equipamentos de rede. O objetivo é trazer maior segurança, evitar falhas humanas e garantir que as configurações críticas estejam sempre atualizadas e armazenadas de forma segura.
+    <h2>Funcionalidades Principais</h2>
+    <h3>Automatização e Backup Diário</h3>
+    <ul>
+        <li><strong>Salvamento Automático:</strong> Executa o comando <code>save</code> no equipamento diariamente, garantindo que todas as alterações realizadas sejam armazenadas permanentemente.</li>
+        <li><strong>Backup Organizado:</strong> Captura as configurações completas via <code>display current-configuration</code> e as armazena em arquivos organizados por data no servidor.</li>
+    </ul>
 
-Funcionalidades
+    <h3>Execução e Agendamento com Systemd</h3>
+    <ul>
+        <li><strong>Agendamento Automático:</strong> Substituímos o uso do cron pelo <strong>Systemd Timer</strong>, uma ferramenta moderna e robusta para agendamento no Ubuntu Server.</li>
+        <li><strong>Geração de Logs:</strong> Logs detalhados são criados durante a execução para monitoramento e solução de falhas.</li>
+    </ul>
 
-Automatização e Backup Diário
+    <h2>Tecnologias e Ferramentas Utilizadas</h2>
+    <ul>
+        <li><strong>Python:</strong> Linguagem principal pela sua versatilidade e eficiência para automação.</li>
+        <li><strong>Paramiko:</strong> Biblioteca para conexões SSH e execução de comandos remotos.</li>
+        <li><strong>Datetime/OS:</strong> Para manipulação de arquivos e organização por data.</li>
+        <li><strong>Ubuntu Server:</strong> Ambiente utilizado para executar o script e armazenar backups.</li>
+        <li><strong>VMware ESXi:</strong> Plataforma de virtualização usada para criar e gerenciar a máquina virtual.</li>
+    </ul>
 
-Salvamento Automático: Executa o comando save no equipamento diariamente às 00:00, garantindo que todas as alterações realizadas sejam armazenadas permanentemente no equipamento.
+    <h2>Benefícios do Script</h2>
+    <ul>
+        <li>Reduz erros humanos automatizando tarefas repetitivas.</li>
+        <li>Garante a segurança e o armazenamento atualizado das configurações da rede.</li>
+        <li>Facilita a recuperação de configurações em emergências.</li>
+    </ul>
 
-Backup Organizado: Realiza o comando display current-configuration para capturar as configurações completas, armazenando-as em arquivos organizados por data em diretórios no servidor. Isso facilita a recuperação em caso de necessidade.
+    <h2>Como Funciona o Script?</h2>
+    <ol>
+        <li>Conecta-se ao equipamento via SSH usando o Paramiko.</li>
+        <li>Executa o comando <code>save</code> para salvar alterações.</li>
+        <li>Captura as configurações com o comando <code>display current-configuration</code>.</li>
+        <li>Armazena os backups em diretórios separados por data.</li>
+        <li>Registra logs detalhados de cada execução.</li>
+    </ol>
 
-Execução e Agendamento
+    <h2>Como Implementar no Linux com Systemd Timers</h2>
+    <h3>1. Estrutura de Diretórios</h3>
+    <pre>
+mkdir -p /home/rotina/{scripts,logs,backups}
+    </pre>
 
-Agendamento Automático: O script é executado diariamente por meio do cron no Ubuntu Server.
+    <h3>2. Instale Dependências</h3>
+    <pre>
+sudo apt update
+sudo apt install python3 python3-pip -y
+pip3 install paramiko
+    </pre>
 
-Geração de Logs: Logs detalhados são criados durante cada execução, permitindo a análise de eventuais problemas.
+    <h3>3. Coloque o Script no Diretório</h3>
+    <p>Salve o script Python em <code>/home/rotina/scripts/huawei_backup.py</code>.</p>
 
-Tecnologias e Ferramentas Utilizadas
+    <h3>4. Crie o Arquivo Systemd Service</h3>
+    <pre>
+sudo nano /etc/systemd/system/huawei_backup.service
+    </pre>
+    <div class="highlight">
+        <pre>
+[Unit]
+Description=Execução do Script de Backup Huawei
+After=network.target
 
-Python: Linguagem principal utilizada, conhecida por sua simplicidade e versatilidade em automação.
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /home/rotina/scripts/huawei_backup.py
+WorkingDirectory=/home/rotina/scripts
+StandardOutput=append:/home/rotina/logs/huawei_backup.log
+StandardError=append:/home/rotina/logs/huawei_backup_error.log
 
-Paramiko: Biblioteca Python utilizada para conexão SSH e execução de comandos remotamente.
+[Install]
+WantedBy=multi-user.target
+        </pre>
+    </div>
 
-Datetime e OS: Funções para manipulação de arquivos e organização por data.
+    <h3>5. Crie o Arquivo Systemd Timer</h3>
+    <pre>
+sudo nano /etc/systemd/system/huawei_backup.timer
+    </pre>
+    <div class="highlight">
+        <pre>
+[Unit]
+Description=Agendamento Diário para Backup Huawei
 
-Ubuntu Server: Ambiente Linux para armazenamento dos arquivos e execução do script.
+[Timer]
+OnCalendar=*-*-* 00:00:00
+Persistent=true
+Unit=huawei_backup.service
 
-VMware ESXi: Plataforma utilizada para criar e gerenciar a máquina virtual.
+[Install]
+WantedBy=timers.target
+        </pre>
+    </div>
 
-Benefícios
+    <h3>6. Habilite e Inicie o Timer</h3>
+    <pre>
+sudo systemctl daemon-reload
+sudo systemctl enable huawei_backup.timer
+sudo systemctl start huawei_backup.timer
+    </pre>
 
-Redução de Erros Humanos: Automatiza tarefas repetitivas e minimiza erros operacionais.
+    <h3>7. Verifique o Status do Timer</h3>
+    <pre>
+systemctl list-timers
+    </pre>
 
-Segurança: Garante que as configurações da rede estejam sempre salvas e atualizadas.
-
-Eficiência: Facilita a recuperação de configurações em casos de emergência.
-
-Como Funciona
-
-O script é agendado no cron para ser executado diariamente às 00:00.
-
-Durante a execução, ele:
-
-Conecta-se ao equipamento de rede via SSH usando a biblioteca Paramiko.
-
-Executa o comando save para salvar alterações no equipamento.
-
-Executa o comando display current-configuration para capturar as configurações completas.
-
-Armazena as configurações em arquivos organizados por data no servidor.
-
-Gera logs detalhados do processo.
-
-Expansão
-
-A ideia é expandir a automação para outros equipamentos e processos dentro da empresa, reduzindo ainda mais o trabalho manual e aumentando a segurança operacional.
-
-Configuração do Cron
-
-Exemplo de configuração do cron para executar o script:
-
-0 0 * * * /usr/bin/python3 /caminho/para/seu/script.py >> /caminho/para/log.txt 2>&1
-
-Contribuições
-
-Contribuições para melhorias são bem-vindas! Por favor, envie um pull request ou abra uma issue.
+    <h2>Contribuições</h2>
+    <p>
+        Contribuições e sugestões são bem-vindas! Sinta-se à vontade para abrir uma issue ou enviar um pull request.
+    </p>
+</body>
+</html>
