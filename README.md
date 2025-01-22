@@ -2,8 +2,6 @@
 
 Este repositório contém um script Python desenvolvido para automatizar o processo de salvamento e backup de configurações em equipamentos de rede. O objetivo é trazer maior segurança, evitar falhas humanas e garantir que as configurações críticas estejam sempre atualizadas e armazenadas de forma segura.
 
-Atualmente, o script está aplicado ao Huawei NE8000, que desempenha um papel importante no servidor PPPoE e na borda da rede.
-
 Funcionalidades
 
 Automatização e Backup Diário
